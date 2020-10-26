@@ -34,6 +34,29 @@ Beyond this protocol, you are largely on your own. The goal of this project is t
 
 ## Getting Started
 
+### Installation
+
+#### [Swift Package Manager](https://swift.org/package-manager/)
+
+Update your `Package.swift` file like so:
+
+```swift
+let package = Package(
+    // name, platforms, products, etc.
+    dependencies: [
+        .package(url: "https://github.com/sejr/swift-authentication", from: "0.0.1"),
+        // other dependencies
+    ],
+    targets: [
+        .target(name: "<target>", dependencies: [
+            "Authentication",
+            // other dependencies
+        ]),
+        // other targets
+    ]
+)
+```
+
 ### Defining an authentication service
 
 ```swift
@@ -59,7 +82,6 @@ class ExampleAuthenticationService {
         case unknown
     }
 }
-
 
 extension ExampleAuthenticationService: AuthenticationService {
     typealias Credential = UsernamePasswordCredential // provided by Authentication
