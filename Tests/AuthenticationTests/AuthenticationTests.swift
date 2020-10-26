@@ -3,13 +3,27 @@ import XCTest
 
 final class AuthenticationTests: XCTestCase {
     func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct
-        // results.
-        XCTAssertEqual(Authentication().text, "Hello, World!")
+        let service = ExampleAuthenticationService()
+        let credential = ExampleAuthenticationService.ServiceCredential(
+            username: "testing",
+            password: "testing"
+        )
+        let result = service.authenticate(withCredential: credential)
+        
+        // Check result of authentication attempt
+        switch result {
+        case .success(let user):
+            print(user.id)
+        case .failure(let err):
+            print(err)
+        }
     }
 
     static var allTests = [
         ("testExample", testExample),
     ]
 }
+
+
+
+
