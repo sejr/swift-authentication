@@ -44,7 +44,7 @@ Update your `Package.swift` file like so:
 let package = Package(
     // name, platforms, products, etc.
     dependencies: [
-        .package(url: "https://github.com/sejr/swift-authentication", from: "0.0.1"),
+        .package(url: "https://github.com/sejr/swift-authentication", from: "0.1.0"),
         // other dependencies
     ],
     targets: [
