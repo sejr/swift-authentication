@@ -2,7 +2,7 @@
 
 class ExampleAuthenticationService {
     /// General notion of user identity within this example service.
-    struct User {
+    struct User: Equatable, Identifiable {
         /// The unique ID for the user.
         var id: String
     }
@@ -28,7 +28,7 @@ extension ExampleAuthenticationService: AuthenticationService {
     }
     
     func authenticate(
-        withCredential credential: UsernamePasswordCredential
+        with credential: UsernamePasswordCredential
     ) -> Result<AuthenticationSuccess, AuthenticationFailure> {
         let validUsername = credential.username == "testing"
         let validPassword = credential.password == "testing"

@@ -8,15 +8,11 @@ final class AuthenticationTests: XCTestCase {
             username: "testing",
             password: "testing"
         )
-        let result = service.authenticate(withCredential: credential)
         
-        // Check result of authentication attempt
-        switch result {
-        case .success(let user):
-            print(user.id)
-        case .failure(let err):
-            print(err)
-        }
+        let expectedUser = ExampleAuthenticationService.User(id: "testing")
+        let expectedResult: Result<ExampleAuthenticationService.User, ExampleAuthenticationService.ServiceError> = .success(expectedUser)
+        let result = service.authenticate(with: credential)
+        XCTAssertEqual(result, expectedResult)
     }
 
     static var allTests = [
