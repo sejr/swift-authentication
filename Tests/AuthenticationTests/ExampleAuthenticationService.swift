@@ -27,16 +27,14 @@ extension ExampleAuthenticationService: AuthenticationService {
         var password: String
     }
     
-    func authenticate(
-        with credential: UsernamePasswordCredential
-    ) -> Result<AuthenticationSuccess, AuthenticationFailure> {
+    func authenticate(with credential: UsernamePasswordCredential, completion: @escaping (Result<ExampleAuthenticationService.User, ExampleAuthenticationService.ServiceError>) -> Void) {
         let validUsername = credential.username == "testing"
         let validPassword = credential.password == "testing"
         
         if (validUsername && validPassword) {
-            return .success(ExampleAuthenticationService.User(id: credential.username))
+            completion(.success(ExampleAuthenticationService.User(id: credential.username)))
         } else {
-            return .failure(.invalidCredential)
+            completion(.failure(.invalidCredential))
         }
     }
 }
