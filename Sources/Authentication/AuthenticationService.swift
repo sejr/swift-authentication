@@ -17,5 +17,8 @@ public protocol AuthenticationService {
     associatedtype AuthenticationFailure: Error
     
     /// Authenticates a user based on some provided `Credential`.
-    func authenticate(with credential: Credential) -> Result<AuthenticationSuccess, AuthenticationFailure>
+    func authenticate(
+        with credential: Credential,
+        completion: @escaping (Result<AuthenticationSuccess, AuthenticationFailure>) -> Void
+    )
 }

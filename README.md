@@ -26,7 +26,10 @@ public protocol AuthenticationService {
     associatedtype AuthenticationFailure: Error
     
     /// Authenticates a user based on some provided `Credential`.
-    func authenticate(withCredential credential: Credential) -> Result<AuthenticationSuccess, AuthenticationFailure>
+    func authenticate(
+        with credential: Credential,
+        completion: @escaping (Result<AuthenticationSuccess, AuthenticationFailure>) -> Void
+    )
 }
 ```
 
@@ -84,29 +87,26 @@ class ExampleAuthenticationService {
 }
 
 extension ExampleAuthenticationService: AuthenticationService {
-    typealias Credential = UsernamePasswordCredential // provided by Authentication
-    typealias AuthenticationSuccess = User // defined above
-    typealias AuthenticationFailure = ServiceError // defined above
+    typealias Credential = UsernamePasswordCredential
+    typealias AuthenticationSuccess = User
+    typealias AuthenticationFailure = ServiceError
     
     public struct ServiceCredential: UsernamePasswordCredential {
         var username: String
         var password: String
     }
     
-    func authenticate(
-        withCredential credential: UsernamePasswordCredential
-    ) -> Result<ExampleAuthenticationService.User, ExampleAuthenticationService.ServiceError> {
+    func authenticate(with credential: UsernamePasswordCredential, completion: @escaping (Result<ExampleAuthenticationService.User, ExampleAuthenticationService.ServiceError>) -> Void) {
         let validUsername = credential.username == "testing"
         let validPassword = credential.password == "testing"
         
         if (validUsername && validPassword) {
-            return .success(ExampleAuthenticationService.User(id: credential.username))
+            completion(.success(ExampleAuthenticationService.User(id: credential.username)))
         } else {
-            return .failure(.invalidCredential)
+            completion(.failure(.invalidCredential))
         }
     }
 }
-
 ```
 
 ### Building a credential
@@ -126,13 +126,13 @@ let credential = ExampleAuthenticationService.ServiceCredential(
 The `AuthenticationService` provides a single function, `authenticate`, which takes the credential type you've defined, and returns the result you've defined. It's pretty straight-forward, right?
 
 ```swift
-let result = service.authenticate(withCredential: credential)
-
-// Check result of authentication attempt
-switch result {
-case .success(let user):
-    print(user.id)
-case .failure(let err):
-    print(err)
+service.authenticate(with: credential) { (result) in
+    // Check result of authentication attempt
+    switch result {
+    case .success(let user):
+        print(user.id)
+    case .failure(let err):
+        print(err)
+    }
 }
 ```

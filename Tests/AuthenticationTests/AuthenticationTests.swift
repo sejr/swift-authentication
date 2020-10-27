@@ -11,8 +11,10 @@ final class AuthenticationTests: XCTestCase {
         
         let expectedUser = ExampleAuthenticationService.User(id: "testing")
         let expectedResult: Result<ExampleAuthenticationService.User, ExampleAuthenticationService.ServiceError> = .success(expectedUser)
-        let result = service.authenticate(with: credential)
-        XCTAssertEqual(result, expectedResult)
+        
+        service.authenticate(with: credential) { (result) in
+            XCTAssertEqual(result, expectedResult)
+        }
     }
 
     static var allTests = [
