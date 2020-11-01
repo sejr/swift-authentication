@@ -2,38 +2,10 @@
 
 ![Swift](https://github.com/sejr/swift-authentication/workflows/Swift/badge.svg)
 
-This Swift package provides a simple protocol-based interface for defining authentication mechanisms for a service.
+This Swift package provides lightweight yet opinionated abstractions enabling developers to build secure authentication systems.
 
-At its foundation is the `AuthenticationService` protocol, copied here for convenience:
-
-```swift
-/// Functionality that enables a service to _authenticate_ a user.
-///
-/// Authentication is defined as verifying the identity of the user. This specifically does not include
-/// functionality for determining which actions the user has _authorization_ for.
-public protocol AuthenticationService {
-    /// Information that can be used to verify the identity of a user.
-    ///
-    /// This information will generally have some security implications; you should ensure it is transmitted
-    /// and stored (if necessary) in a secure fashion, using encryption and/or hashing. Those mechanisms are
-    /// outside the scope of the Swift Authentication package.
-    associatedtype Credential
-    
-    /// The result of a successful authentication request.
-    associatedtype AuthenticationSuccess
-    
-    /// The result of a failed authentication request.
-    associatedtype AuthenticationFailure: Error
-    
-    /// Authenticates a user based on some provided `Credential`.
-    func authenticate(
-        with credential: Credential,
-        completion: @escaping (Result<AuthenticationSuccess, AuthenticationFailure>) -> Void
-    )
-}
-```
-
-Beyond this protocol, you are largely on your own. The goal of this project is to provide some common credential types, such as the `UsernamePasswordCredential` for basic username and password authentication.
+- **`Authentication`** is the foundation for all other libraries. It defines the `Credential` and `AuthenticationService` protocols, which are the building blocks for authentication flows of varying complexity.
+- **`WebAuthentication`** builds on that foundation to help developers build web-based authentication mechanisms, such as the [Web Authentication API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API).
 
 ## Getting Started
 
@@ -47,92 +19,30 @@ Update your `Package.swift` file like so:
 let package = Package(
     // name, platforms, products, etc.
     dependencies: [
-        .package(url: "https://github.com/sejr/swift-authentication", from: "0.1.0"),
+        .package(url: "https://github.com/sejr/swift-authentication", from: "x.y.z"),
         // other dependencies
     ],
     targets: [
         .target(name: "<target>", dependencies: [
+            // For custom authentication systems (not recommended, but possible)
             "Authentication",
-            // other dependencies
+            
+            // For web-based authentication systems
+            "WebAuthentication"
+            
+            // other target dependencies
         ]),
         // other targets
     ]
 )
 ```
 
-### Defining an authentication service
+## Roadmap
 
-```swift
-import Authentication
+Our long-term goal is to provide "batteries-included" solutions for authentication in various domains.
 
-/// An example service.
-///
-/// Notice that this definition has nothing pertaining to authentication; we encapsulate all of that
-/// information inside an extension.
-class ExampleAuthenticationService {
-    /// General notion of user identity within this example service.
-    struct User {
-        /// The unique ID for the user.
-        var id: String
-    }
-    
-    /// General error for this example service.
-    enum ServiceError: Error {
-        /// Invalid username and password combination.
-        case invalidCredential
-        
-        /// Something else went wrong.
-        case unknown
-    }
-}
+### Authentication for the web
 
-extension ExampleAuthenticationService: AuthenticationService {
-    typealias Credential = UsernamePasswordCredential
-    typealias AuthenticationSuccess = User
-    typealias AuthenticationFailure = ServiceError
-    
-    public struct ServiceCredential: UsernamePasswordCredential {
-        var username: String
-        var password: String
-    }
-    
-    func authenticate(with credential: UsernamePasswordCredential, completion: @escaping (Result<ExampleAuthenticationService.User, ExampleAuthenticationService.ServiceError>) -> Void) {
-        let validUsername = credential.username == "testing"
-        let validPassword = credential.password == "testing"
-        
-        if (validUsername && validPassword) {
-            completion(.success(ExampleAuthenticationService.User(id: credential.username)))
-        } else {
-            completion(.failure(.invalidCredential))
-        }
-    }
-}
-```
+**The web is our first priority.** Most prior work related to Swift web authentication has been done within the [Vapor](https://vapor.codes/) project. If you are looking for a production-ready framework for building web services (with or without authentication requirements) in Swift, we strongly recommend you start there.
 
-### Building a credential
-
-This step is largely dependent on how you have defined your credential. Because our `ExampleAuthenticationService` has defined a
-`ServiceCredential` type that conforms to `UsernamePasswordCredential`, it can be used like so:
-
-```swift
-let credential = ExampleAuthenticationService.ServiceCredential(
-    username: "testing",
-    password: "testing"
-)
-```
-
-### Authenticating the credential against the service
-
-The `AuthenticationService` provides a single function, `authenticate`, which takes the credential type you've defined, and returns the result you've defined. It's pretty straight-forward, right?
-
-```swift
-service.authenticate(with: credential) { (result) in
-    // Check result of authentication attempt
-    switch result {
-    case .success(let user):
-        print(user.id)
-    case .failure(let err):
-        print(err)
-    }
-}
-```
+Our `WebAuthentication` package is designed to fit in the space between Vapor and [SwiftNIO](https://github.com/apple/swift-nio), which Vapor is already built on. We will provide _middleware_ suitable for integration within Vapor, though SwiftNIO will be the only required dependency.
