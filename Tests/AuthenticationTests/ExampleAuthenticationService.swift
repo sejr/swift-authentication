@@ -18,21 +18,23 @@ class ExampleAuthenticationService {
 }
 
 extension ExampleAuthenticationService: AuthenticationService {
-    typealias Credential = UsernamePasswordCredential
+    typealias AuthenticationCredential = ServiceCredential
     typealias AuthenticationSuccess = User
     typealias AuthenticationFailure = ServiceError
     
-    public struct ServiceCredential: UsernamePasswordCredential {
-        var username: String
-        var password: String
+    public struct ServiceCredential: PasswordCredential {
+        public var id: String
+        public var password: String
     }
     
-    func authenticate(with credential: UsernamePasswordCredential, completion: @escaping (Result<ExampleAuthenticationService.User, ExampleAuthenticationService.ServiceError>) -> Void) {
-        let validUsername = credential.username == "testing"
+    func authenticate(
+        with credential: ExampleAuthenticationService.ServiceCredential,
+        completion: @escaping (Result<ExampleAuthenticationService.User, ExampleAuthenticationService.ServiceError>) -> Void) {
+        let validUsername = credential.id == "testing"
         let validPassword = credential.password == "testing"
         
         if (validUsername && validPassword) {
-            completion(.success(ExampleAuthenticationService.User(id: credential.username)))
+            completion(.success(ExampleAuthenticationService.User(id: credential.id)))
         } else {
             completion(.failure(.invalidCredential))
         }
