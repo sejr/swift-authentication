@@ -2,40 +2,43 @@
 
 import PackageDescription
 
-/// Dependencies for provided libraries.
-let dependencies: [Package.Dependency] = [
-//    .package(url: "https://github.com/apple/swift-crypto", from: "1.1.0"),
-    .package(url: "https://github.com/apple/swift-nio", from: "2.0.0"),
-]
-
-/// Common foundation for all authentication libraries.
-let authentication: Target = .target(name: "Authentication", dependencies: [])
-let authenticationTests: Target = .testTarget(
-    name: "AuthenticationTests",
-    dependencies: ["Authentication"]
-)
-
-/// Building blocks for web-based authentication mechanisms.
-let webAuthentication: Target = .target(
-    name: "WebAuthentication",
-    dependencies: [
-        "Authentication",
-//        "Crypto",
-        "NIOHTTP1",
-    ]
-)
-
 /// Swift Authentication package definition.
 let package = Package(
     name: "Authentication",
+    platforms: [
+        .macOS(.v10_15)
+    ],
     products: [
         .library(name: "Authentication", targets: ["Authentication"]),
+        .library(name: "OneTimePasswords", targets: ["OneTimePasswords"]),
         .library(name: "WebAuthentication", targets: ["WebAuthentication"]),
     ],
-    dependencies: dependencies,
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-crypto", from: "1.1.0"),
+        .package(url: "https://github.com/apple/swift-nio", from: "2.0.0"),
+    ],
     targets: [
-        authentication,
-        authenticationTests,
-        webAuthentication,
+        .target(name: "Authentication", dependencies: []),
+        .testTarget(
+            name: "AuthenticationTests",
+            dependencies: ["Authentication"]
+        ),
+        
+        .target(
+            name: "OneTimePasswords",
+            dependencies: [
+                "Authentication",
+                "Crypto"
+            ]
+        ),
+        
+        .target(
+            name: "WebAuthentication",
+            dependencies: [
+                "Authentication",
+                "Crypto",
+                "NIOHTTP1",
+            ]
+        ),
     ]
 )
